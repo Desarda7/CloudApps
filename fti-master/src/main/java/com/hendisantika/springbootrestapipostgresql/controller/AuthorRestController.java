@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.util.Collection;
 import java.util.Optional;
@@ -32,50 +35,82 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/authors")
 public class AuthorRestController {
+    private static final Logger LOGGER = LogManager.getLogger(AuthorRestController.class);
 
     @Autowired
     private AuthorRepository repository;
 
     @PostMapping
     public ResponseEntity<?> addAuthor(@RequestBody Author author) {
+        LOGGER.info("Adding author: {}", author);
+        Author savedAuthor = repository.save(author);
+        LOGGER.info("Author added successfully: {}", savedAuthor);
         return new ResponseEntity<>(repository.save(author), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<Collection<Author>> getAllAuthors() {
+        LOGGER.info("Retrieving all authors");
+        Collection<Author> authors = repository.findAll();
+        LOGGER.info("Found {} authors", authors.size());
         return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Author> getAuthorWithId(@PathVariable Long id) {
-        return new ResponseEntity<Author>(repository.findById(id).get(), HttpStatus.OK);
+        LOGGER.info("Retrieving author with id: {}", id);
+        Optional<Author> authorOpt = repository.findById(id);
+        if (authorOpt.isPresent()) {
+            LOGGER.info("Author found with id {}: {}", id, authorOpt.get());
+            return new ResponseEntity<>(authorOpt.get(), HttpStatus.OK);
+        } else {
+            LOGGER.warn("Author not found with id: {}", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(params = {"name"})
     public ResponseEntity<Collection<Author>> findAuthorWithName(@RequestParam(value = "name") String name) {
-        return new ResponseEntity<>(repository.findByName(name), HttpStatus.OK);
+        LOGGER.info("Searching for authors with name: {}", name);
+        Collection<Author> authors = repository.findByName(name);
+        LOGGER.info("Found {} authors with name: {}", authors.size(), name);
+        return new ResponseEntity<>(authors, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Author> updateAuthorFromDB(@PathVariable("id") long id, @RequestBody Author author) {
 
+        LOGGER.info("Updating author with id: {}", id);
         Optional<Author> currentAuthorOpt = repository.findById(id);
-        Author currentAuthor = currentAuthorOpt.get();
-        currentAuthor.setName(author.getName());
-        currentAuthor.setSurname(author.getSurname());
-        currentAuthor.setEmail(author.getEmail());
-        currentAuthor.setTags(author.getTags());
-
-        return new ResponseEntity<>(repository.save(currentAuthor), HttpStatus.OK);
+        if (currentAuthorOpt.isPresent()) {
+            Author currentAuthor = currentAuthorOpt.get();
+            currentAuthor.setName(author.getName());
+            currentAuthor.setSurname(author.getSurname());
+            currentAuthor.setEmail(author.getEmail());
+            currentAuthor.setTags(author.getTags());
+            Author updatedAuthor = repository.save(currentAuthor);
+            LOGGER.info("Author updated successfully: {}", updatedAuthor);
+            return new ResponseEntity<>(updatedAuthor, HttpStatus.OK);
+        } else {
+            LOGGER.warn("Author not found with id: {}", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAuthorWithId(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAuthorWithId(@PathVariable Long id) {
+        LOGGER.info("Deleting author with id: {}", id);
         repository.deleteById(id);
+        LOGGER.info("Author deleted successfully with id: {}", id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping
-    public void deleteAllAuthors() {
+    public ResponseEntity<Void> deleteAllAuthors() {
+        LOGGER.info("Deleting all authors");
         repository.deleteAll();
+        LOGGER.info("All authors deleted successfully");
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-}
+    }
+
