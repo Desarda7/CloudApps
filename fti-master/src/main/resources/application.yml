@@ -41,10 +41,5 @@ security:
     name: user
     password: user
 
-# Additional configuration for GitHub Actions
-github-actions:
-  enabled: true
-  build-on-push: true
-  deployment-target: production
-  deployment-environment: staging
+
 
