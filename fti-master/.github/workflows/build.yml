@@ -20,5 +20,5 @@ jobs:
       with:       
        username: ${{ secrets.DOCKER_HUB_USERNAME }} 
        password:  ${{ secrets.DOCKER_HUB_PASSWORD }}
-       repository: lmilt95/fti       
+       repository: desarda/cloud-apps
        tags: ${{github.run_number}}
