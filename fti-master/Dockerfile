@@ -3,5 +3,5 @@ VOLUME /tmp
 EXPOSE 8080
 WORKDIR /backend
 ARG JAR_FILE=./target/spring-boot-rest-api-postgresql-0.0.1-SNAPSHOT.jar
-ADD ${JAR_FILE} fti.jar
-ENTRYPOINT ["java","-jar","fti.jar"]
+ADD ${JAR_FILE} cloud-apps.jar
+ENTRYPOINT ["java","-jar","cloud-apps.jar"]
