@@ -42,9 +42,9 @@ public class AuthorRestController {
 
     @PostMapping
     public ResponseEntity<?> addAuthor(@RequestBody Author author) {
-        LOGGER.info("Adding author: {}", author);
+        LOGGER.info("Adding author:{}", author);
         Author savedAuthor = repository.save(author);
-        LOGGER.info("Author added successfully: {}", savedAuthor);
+        LOGGER.info("Author added successfully:{}", savedAuthor);
         return new ResponseEntity<>(repository.save(author), HttpStatus.CREATED);
     }
 
